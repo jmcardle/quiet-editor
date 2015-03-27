@@ -1,0 +1,42 @@
+html, body
+{
+    height: 100%;
+}
+
+body {
+    display: flex;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2em;
+}
+
+#text-input {
+    background-color: white;
+    color: black;
+    border: 0;
+    flex: 1;
+    padding: 1em;
+    font-family: inherit;
+    font-size: inherit;
+    resize: none;
+}
+
+#rendered-text {
+    background-color: #202020;
+    color: white;
+    border: 0;
+    flex: 1;
+    padding: 1em;
+}
+
+#rendered-text p {
+    text-align: justify;
+}
+
+#rendered-text h2 {
+    color: #FFCCFF;
+}
+
+#rendered-text blockquote {
+    color: #CCFF99;
+}
