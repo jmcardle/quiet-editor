@@ -19,7 +19,7 @@
 
     <body ng-controller="editorController as editor">
     
-        <textarea id="text-input" ng-model="editor.textInput" ng-change="editor.renderText(editor.textInput)"></textarea>
+        <textarea id="text-input" ng-model="editor.textInput" ng-change="editor.updateText(editor.textInput)"></textarea>
         
         <div id="rendered-text" ng-bind-html="renderedText"></div>
         
