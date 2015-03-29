@@ -40,9 +40,12 @@ def text(file_name):
     if not authorized:
         return jsonify(error=reason)
 
-    if "text" in content:
-        storage.update(file_name, content["text"])
-        rendered_text = markdown.markdown(content["text"], output_format="html5")
+    input_text = content["text"] if "text" in content else ""
+    action = content["action"] if "action" in content else "get"
+
+    if action == "set":
+        storage.update(file_name, input_text)
+        rendered_text = markdown.markdown(input_text, output_format="html5")
         return jsonify(html=rendered_text)
     else:
         initial_text = storage.get(file_name)
