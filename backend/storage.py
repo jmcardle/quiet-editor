@@ -31,6 +31,7 @@ def update(file_name, text):
     print("I got %s" % text)
     current_time = time.time()
     previous_update = None
+
     if file_name in updates:
         previous_update = updates[file_name]
 

@@ -10,7 +10,7 @@ body {
     font-size: 1.2em;
 }
 
-#text-input {
+#input-text {
     background-color: white;
     color: black;
     border: 0;
@@ -27,6 +27,7 @@ body {
     border: 0;
     flex: 1;
     padding: 1em;
+    overflow: auto;
 }
 
 @media (max-width: 800px) {

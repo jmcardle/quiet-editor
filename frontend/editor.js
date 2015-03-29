@@ -3,6 +3,21 @@ const TEXT_URL = "http://127.0.0.1:5000/api/text/default";
 const GET_TEXT = "get";
 const SET_TEXT = "set";
 
+document.addEventListener('DOMContentLoaded', documentReady, false);
+
+function documentReady(){
+    document.getElementById("input-text").addEventListener("scroll", syncRenderedTextScrollBarToInputText);
+}
+
+function syncRenderedTextScrollBarToInputText() {
+    var inputTextDiv = document.getElementById("input-text");
+    var renderedTextDiv = document.getElementById("rendered-text");
+    var percentScroll = ( inputTextDiv.scrollTop + inputTextDiv.offsetHeight ) / inputTextDiv.scrollHeight;
+    var topPosition = renderedTextDiv.scrollHeight * percentScroll - renderedTextDiv.offsetHeight;
+    topPosition = (topPosition < 0) ? 0 : topPosition;
+    renderedTextDiv.scrollTop = topPosition;
+}
+
 (function() {
     
     var app = angular.module('quietEditor', [ ] );
@@ -23,7 +38,7 @@ const SET_TEXT = "set";
 
                     // Populate the text area.
                     if ( action == GET_TEXT ) {
-                        $scope.editor.textInput = data.text;
+                        $scope.editor.inputText = data.text;
                     }
 
                     // Populate the preview.
