@@ -20,9 +20,9 @@ function syncRenderedTextScrollBarToInputText() {
 
 (function() {
     
-    var app = angular.module('quietEditor', [ ] );
+    var app = angular.module('quietEditor', [ 'toaster' ] );
 
-    app.controller('editorController', ['$scope', '$sce', '$http', function($scope, $sce, $http) {
+    app.controller('editorController', ['$scope', '$sce', '$http', 'toaster', function($scope, $sce, $http, toaster) {
 
         // Call the API and handle the output.
         this.callBackend = function ( action, text ) {
@@ -45,7 +45,7 @@ function syncRenderedTextScrollBarToInputText() {
                     $scope.renderedText = $sce.trustAsHtml(data.html);
 
                 }).error(function(data, status, headers, config) {
-                    alert("Could not reach server.");
+                    toaster.pop('warning', "", "Could not reach server.");
             });
 
         }
