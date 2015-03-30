@@ -3,23 +3,27 @@ const TEXT_URL = "http://127.0.0.1:5000/api/text/default";
 const GET_TEXT = "get";
 const SET_TEXT = "set";
 
-document.addEventListener('DOMContentLoaded', documentReady, false);
+$(function() {
 
-function documentReady(){
-    document.getElementById("input-text").addEventListener("scroll", syncRenderedTextScrollBarToInputText);
-}
+    $('#input-text').scroll( function() {
 
-function syncRenderedTextScrollBarToInputText() {
-    var inputTextDiv = document.getElementById("input-text");
-    var renderedTextDiv = document.getElementById("rendered-text");
-    var percentScroll = ( inputTextDiv.scrollTop + inputTextDiv.offsetHeight ) / inputTextDiv.scrollHeight;
-    var topPosition = renderedTextDiv.scrollHeight * percentScroll - renderedTextDiv.offsetHeight;
-    topPosition = (topPosition < 0) ? 0 : topPosition;
-    renderedTextDiv.scrollTop = topPosition;
-}
+        // Get the elements.
+        var inputTextDiv = $('#input-text')[0];
+        var renderedTextDiv = $('#rendered-text')[0];
+
+        // Calculate where to scroll the rendered text to match where the input text is scrolled at.
+        var percentScroll = ( inputTextDiv.scrollTop + inputTextDiv.offsetHeight ) / inputTextDiv.scrollHeight;
+        var topPosition = renderedTextDiv.scrollHeight * percentScroll - renderedTextDiv.offsetHeight;
+        topPosition = (topPosition < 0) ? 0 : topPosition;
+
+        // Apply the scroll.
+        renderedTextDiv.scrollTop = topPosition;
+    });
+
+});
 
 (function() {
-    
+
     var app = angular.module('quietEditor', [ 'toaster' ] );
 
     app.controller('editorController', ['$scope', '$sce', '$http', 'toaster', function($scope, $sce, $http, toaster) {
@@ -59,6 +63,5 @@ function syncRenderedTextScrollBarToInputText() {
         }
 
     }]);
-
 
 })();
