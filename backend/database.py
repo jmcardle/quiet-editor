@@ -16,7 +16,7 @@ class Files:
     def __enter__(self):
 
         self._database = sqlite3.connect(self._database_path)
-        self,_cursor = self._database.cursor()
+        self._cursor = self._database.cursor()
 
         # Create tables if they don't exist.
         self._cursor.execute(Queries.initialize_files_table)
@@ -30,6 +30,13 @@ class Files:
 
             # Save changes.
             self._database.commit()
+
+        else:
+
+            # Inform of failure.
+            print(exception_type)
+            print(exception_value)
+            print(traceback)
 
         # Close.
         self._database.close()
@@ -113,7 +120,7 @@ class Queries:
         CREATE TABLE IF NOT EXISTS files (
             id   INTEGER PRIMARY KEY,
             name TEXT,
-            deleted INTEGER
+            deleted INTEGER,
             UNIQUE(name)
         );
         """
@@ -124,7 +131,7 @@ class Queries:
             file_id             INTEGER,
             timestamp           DATETIME DEFAULT CURRENT_TIMESTAMP,
             compressed_contents BLOB,
-            FOREIGN KEY (file_id_exists) REFERENCES files(id) ON DELETE CASCADE
+            FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE CASCADE
         );
         """
 
