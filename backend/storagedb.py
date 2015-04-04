@@ -2,13 +2,9 @@ import sqlite3
 import zlib
 
 
-class Files:
+class Storage:
 
-    def __init__(self, database_path):
-        """
-        Initializes the database object.
-        :param database_name: A path to the database.
-        """
+    def __init__(self, database_path="files.db"):
 
         self._database_path = database_path
 
@@ -19,8 +15,10 @@ class Files:
         self._cursor = self._database.cursor()
 
         # Create tables if they don't exist.
-        self._cursor.execute(Queries.initialize_files_table)
-        self._cursor.execute(Queries.initialize_revisions_table)
+        self._cursor.execute(Query.initialize_files_table)
+        self._cursor.execute(Query.initialize_revisions_table)
+
+        return self
 
 
     def __exit__(self, exception_type, exception_value, traceback):
@@ -34,8 +32,7 @@ class Files:
         else:
 
             # Inform of failure.
-            print(exception_type)
-            print(exception_value)
+            print((exception_type, exception_value))
             print(traceback)
 
         # Close.
@@ -44,77 +41,83 @@ class Files:
 
     def list(self):
 
-        self._cursor.execute(Queries.list_files)
+        self._cursor.execute(Query.list_files)
         return self._cursor.fetchall()
 
 
     def list_deleted(self):
 
-        self._cursor.execute(Queries.list_deleted_files)
+        self._cursor.execute(Query.list_deleted_files)
         return self._cursor.fetchall()
 
 
     def rename(self, file_name, new_file_name):
 
-        self._cursor.execute(Queries.rename_file, (new_file_name, file_name))
+        self._cursor.execute(Query.rename_file, (new_file_name, file_name))
 
 
     def delete(self, file_name):
 
-        self._cursor.execute(Queries.delete_file, (file_name,))
+        self._cursor.execute(Query.delete_file, (file_name,))
 
 
     def restore_deleted(self, file_id, new_file_name):
 
-        self._cursor.execute(Queries.restore_deleted_file, (new_file_name, file_id))
+        self._cursor.execute(Query.restore_deleted_file, (new_file_name, file_id))
 
 
     def collect_garbage(self):
 
-        self._cursor.execute(Queries.collect_garbage)
+        self._cursor.execute(Query.collect_garbage)
+
+
+    def read(self, file_name):
+
+        # Get the revision.
+        self._cursor.execute(Query.get_latest_revision, (file_name,))
+        result = self._cursor.fetchone()
+
+        if result:
+
+            # Return the data with decompressed text.
+            time_stamp, compressed_content = result
+            return zlib.decompress(compressed_content).decode()
+
+        else:
+
+            return ()
+
+    def write(self, file_name, contents):
+
+        # Store the file name if it doesn't exist.
+        self._cursor.execute(Query.initialize_file, (file_name,))
+
+        # Get the row ID for the file name.
+        self._cursor.execute(Query.get_file_id, (file_name,))
+        file_id = self._cursor.fetchone()[0]
+
+        # Store the compressed text.
+        compressed_text = zlib.compress(contents.encode())
+        self._cursor.execute(Query.insert_revision, (file_id, compressed_text))
 
 
     def list_revisions(self, file_name):
 
-        self._cursor.execute(Queries.get_revisions_list, (file_name,))
+        self._cursor.execute(Query.get_revisions_list, (file_name,))
         return self._cursor.fetchall()
-
-
-    def add_revision(self, file_name, contents):
-
-        # Store the file name if it doesn't exist.
-        self._cursor.execute(Queries.initialize_file, (file_name,))
-
-        # Get the row ID for the file name.
-        self._cursor.execute(Queries.get_file_id, (file_name,))
-        file_id = self._cursor.fetchone()[0]
-
-        # Store the compressed text.
-        compressed_text = zlib.compress(contents)
-        self._cursor.execute(Queries.insert_revision, (file_id, compressed_text))
-
-
-    def get_latest_revision(self, file_name):
-
-        # Get the revision.
-        self._cursor.execute(Queries.get_latest_revision, (file_name,))
-        time_stamp, compressed_content = self._cursor.fetchone()
-
-        # Return the data with decompressed text.
-        return time_stamp, zlib.decompress(compressed_content)
 
 
     def get_revision(self, revision_id):
 
         # Get the revision.
-        self._cursor.execute(Queries.get_revision, (revision_id,))
+        self._cursor.execute(Query.get_revision, (revision_id,))
         time_stamp, compressed_content = self._cursor.fetchone()
 
         # Return the data with decompressed text.
-        return time_stamp, zlib.decompress(compressed_content)
+        return time_stamp, zlib.decompress(compressed_content).decode()
 
 
-class Queries:
+class Query:
 
     initialize_files_table = """
         CREATE TABLE IF NOT EXISTS files (
@@ -245,9 +248,9 @@ class Queries:
             r.id,
             r.timestamp
         FROM
-            file_revisions AS r
+            revisions AS r
         JOIN
-            file_names AS f
+            files AS f
         ON
             f.id = r.file_id
         WHERE
@@ -259,7 +262,7 @@ class Queries:
     get_revision = """
         SELECT
             timestamp,
-            compressed_contents,
+            compressed_contents
         FROM
             revisions
         WHERE
