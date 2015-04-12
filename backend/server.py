@@ -43,14 +43,18 @@ def text(file_name):
     input_text = content["text"] if "text" in content else ""
     action = content["action"] if "action" in content else "get"
 
-    if action == "set":
-        storage.update(file_name, input_text)
-        rendered_text = markdown.markdown(input_text, output_format="html5")
-        return jsonify(html=rendered_text)
-    else:
+    if action == "get":
         initial_text = storage.get(file_name)
         rendered_text = markdown.markdown(initial_text, output_format="html5")
         return jsonify(text=initial_text, html=rendered_text)
+
+    elif action == "set":
+        storage.update(file_name, input_text)
+        rendered_text = markdown.markdown(input_text, output_format="html5")
+        return jsonify(html=rendered_text)
+
+    else:
+        return jsonify(error="Unknown action")
 
 
 if __name__ == '__main__':

@@ -1,52 +1,45 @@
-import time
-import threading
-from storagedb import Storage
+import os.path
 
-updates = {}
-in_memory_text = {}
-unsaved_changes = {}
-minimum_time_between_saves = 10
-
-def check_unsaved():
-    for file_name in unsaved_changes:
-        if unsaved_changes[file_name]:
-            print("%s has unsaved changes" % (file_name))
-            update(file_name, in_memory_text[file_name])
-    threading.Timer(5, check_unsaved).start()
-
-check_unsaved()
+files = {}
 
 def get(file_name):
-    print("Loaded %s" % (file_name))
-    try:
-        with Storage() as storage:
-            content = storage.read(file_name)
-            return content if content else ""
 
-    except IOError:
+    # Copy exists in memory.
+    if file_name in files:
+        return files[file_name]
+
+    # Copy exists on disk. Load it in memory.
+    elif os.path.isfile(file_name):
+        with open(file_name, "r") as file:
+            text = file.read()
+            files[file_name] = text
+            return text
+
+    # No copy exists.
+    else:
         return ""
 
-
 def update(file_name, text):
-    print("I got %s" % text)
-    current_time = time.time()
-    previous_update = None
 
-    if file_name in updates:
-        previous_update = updates[file_name]
+    # File doesn't exist or isn't in database.
+    if not os.path.isfile(file_name) or file_name not in files:
+        with open(file_name, "w") as file:
+            file.write(text)
 
-    if not previous_update or current_time - previous_update > minimum_time_between_saves:
+    # Just text is appended.
+    elif text.startswith(files[file_name]):
+        with open(file_name, "a") as file:
+            file.write(text[len(files[file_name]):])
 
-        with Storage() as storage:
-            return storage.write(file_name, text)
+    # Just text is removed.
+    elif files[file_name].startswith(text):
+        with open(file_name, "w") as file:
+            file.truncate(len(text))
 
-        print("Saved %s" % (file_name))
-        updates[file_name] = current_time
-        unsaved_changes[file_name] = False
-
+    # Content added elsewhere.
     else:
+        with open(file_name, "w") as file:
+            file.write(text)
 
-        unsaved_changes[file_name] = True
-        print("Difference not saved to %s as %i seconds elapsed" % (file_name, current_time - previous_update))
-
-    in_memory_text[file_name] = text
+    # Update memory.
+    files[file_name] = text
