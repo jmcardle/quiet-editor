@@ -30,7 +30,11 @@
 
         <div id="command-mouseover">
 
-            <input id="command" ng-model="editor.command">
+            <form ng-submit="editor.runCommand(editor.command)">
+
+                <input id="command" ng-model="editor.command">
+
+            </form>
 
         </div>
 

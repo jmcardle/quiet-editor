@@ -1,8 +1,12 @@
-import os.path
 import base64
+import os
 
 files = {}
 file_directory = "../files"
+
+def list():
+
+    return [from_safe_filename(file_name) for file_name in os.listdir(file_directory)]
 
 def get(file_name):
 

@@ -1,7 +1,10 @@
 const AUTHORIZATION_KEY = "3ul4VME1iusE8f5t4C3Fx7m39xOmJ49q";
-const TEXT_URL = "http://127.0.0.1:5000/api/text/default";
+const TEXT_URL = "http://127.0.0.1:5000/api/text/";
 const GET_TEXT = "get";
 const SET_TEXT = "set";
+const LIST_FILES = "list"
+const LOAD_FILE = "load"
+var current_file = "default"
 
 $(function() {
 
@@ -37,7 +40,7 @@ $(function() {
                 request["text"] = text;
             }
 
-            $http.post( TEXT_URL, request ).
+            $http.post( TEXT_URL + current_file, request ).
                 success(function(data, status, headers, config) {
 
                     // Populate the text area.
@@ -60,6 +63,18 @@ $(function() {
         // Whenever there's new text, update the server.
         this.updateText = function( text ) {
             this.callBackend(SET_TEXT, text);
+        }
+
+        // When a command comes in, process it.
+        this.runCommand = function( command ) {
+
+            if ( command == LIST_FILES ) {
+                this.callBackend(LIST_FILES);
+                this.command = null;
+            } else {
+                toaster.pop('error', '', "Unrecognized command.");
+            }
+
         }
 
     }]);

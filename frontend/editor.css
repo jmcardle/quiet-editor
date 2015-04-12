@@ -71,6 +71,10 @@ main {
     text-align: justify;
 }
 
+#rendered-text h1 {
+    color: rgb(255,255,153);
+}
+
 #rendered-text h2 {
     color: #FFCCFF;
 }

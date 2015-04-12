@@ -53,6 +53,12 @@ def text(file_name):
         rendered_text = markdown.markdown(input_text, output_format="html5")
         return jsonify(html=rendered_text)
 
+    elif action == "list":
+        file_names_in_markdown = str().join(["* " + file_name + "\n" for file_name in files.list()])
+        markdown_output = "# Available Files\n" + file_names_in_markdown
+        rendered_text = markdown.markdown(markdown_output, output_format="html5")
+        return jsonify(html=rendered_text)
+
     else:
         return jsonify(error="Unknown action")
 
