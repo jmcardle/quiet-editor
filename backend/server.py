@@ -2,7 +2,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import markdown
-import storage
+import files
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -44,12 +44,12 @@ def text(file_name):
     action = content["action"] if "action" in content else "get"
 
     if action == "get":
-        initial_text = storage.get(file_name)
+        initial_text = files.get(file_name)
         rendered_text = markdown.markdown(initial_text, output_format="html5")
         return jsonify(text=initial_text, html=rendered_text)
 
     elif action == "set":
-        storage.update(file_name, input_text)
+        files.update(file_name, input_text)
         rendered_text = markdown.markdown(input_text, output_format="html5")
         return jsonify(html=rendered_text)
 
