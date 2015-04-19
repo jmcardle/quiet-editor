@@ -3,10 +3,18 @@ import os
 
 files = {}
 file_directory = "../files"
+trash_directory = "../files/trash"
 
 def list():
 
-    return [from_safe_filename(file_name) for file_name in os.listdir(file_directory)]
+    return [from_safe_filename(file_name) for file_name in os.listdir(file_directory)
+                if os.path.isfile(os.path.join(file_directory, file_name))]
+
+def list_trash():
+
+    return [from_safe_filename(file_name) for file_name in os.listdir(trash_directory)
+                if os.path.isfile(os.path.join(trash_directory, file_name))]
+
 
 def get(file_name):
 
@@ -45,6 +53,23 @@ def update(file_name, text):
     # Update memory.
     files[file_name] = text
 
+def trash(file_name):
+    return move_file(file_name, file_directory, trash_directory)
+
+def restore(file_name):
+    return move_file(file_name, trash_directory, file_directory)
+
+def move_file(file_name, from_directory, to_directory):
+
+    # Try moving the file.
+    try:
+        os.rename(to_safe_filename(file_name, from_directory), to_safe_filename(file_name, to_directory))
+        return True
+
+    # Indicate failure if the file could not be moved.
+    except OSError:
+        return False
+
 def write_file(file_name, content, mode="w"):
     with open(to_safe_filename(file_name), mode) as file:
         file.write(content)
@@ -63,8 +88,8 @@ def truncate_file(file_name, size):
 def file_exists(file_name):
     return os.path.isfile(to_safe_filename(file_name))
 
-def to_safe_filename(file_name):
-    return os.path.join(file_directory, base64.urlsafe_b64encode(file_name.encode()).decode())
+def to_safe_filename(file_name, directory=file_directory):
+    return os.path.join(directory, base64.urlsafe_b64encode(file_name.encode()).decode())
 
 def from_safe_filename(file_name):
     return base64.urlsafe_b64decode(os.path.basename(file_name)).decode()

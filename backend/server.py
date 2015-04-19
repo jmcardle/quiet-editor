@@ -26,11 +26,11 @@ def validate_auth_key(content):
         return False, "Unauthorized Request"
 
 
-@app.route('/api/text/<file_name>', methods=['POST'])
-def text(file_name):
+@app.route('/api/text/<file_parameter>', methods=['POST'])
+def text(file_parameter):
     """
     Either updates or retrieves a text file, depending on the query.
-    :param file_name:The text file to update/get.
+    :param file_parameter:The text file to update/get.
     :return: The rendered text, as HTML.
     """
 
@@ -40,24 +40,40 @@ def text(file_name):
     if not authorized:
         return jsonify(error=reason)
 
-    input_text = content["text"] if "text" in content else ""
     action = content["action"] if "action" in content else "get"
+    print("Action \"%s\" on file \"%s\"" % (action, file_parameter))
 
     if action == "get":
-        initial_text = files.get(file_name)
+        initial_text = files.get(file_parameter)
         rendered_text = markdown.markdown(initial_text, output_format="html5")
-        return jsonify(text=initial_text, html=rendered_text)
+        return jsonify(text=initial_text, html=rendered_text, info=str("Loaded \"%s\"" % file_parameter))
 
     elif action == "set":
-        files.update(file_name, input_text)
+        input_text = content["text"] if "text" in content else ""
+        files.update(file_parameter, input_text)
         rendered_text = markdown.markdown(input_text, output_format="html5")
         return jsonify(html=rendered_text)
 
     elif action == "list":
-        file_names_in_markdown = str().join(["* " + file_name + "\n" for file_name in files.list()])
-        markdown_output = "# Available Files\n" + file_names_in_markdown
+        markdown_output = ""
+
+        if ( file_parameter == "trash" ):
+            markdown_output = "# Trash Bin\n"
+            markdown_output += str().join(["* " + single_file + "\n" for single_file in files.list_trash()])
+        else:
+            markdown_output = "# Available Files\n"
+            markdown_output += str().join(["* " + single_file + "\n" for single_file in files.list()])
+
         rendered_text = markdown.markdown(markdown_output, output_format="html5")
         return jsonify(html=rendered_text)
+
+    elif action == "trash":
+        success = files.trash(file_parameter)
+        return jsonify(info="File Deleted") if success else jsonify(error="File Could Not Be Deleted")
+
+    elif action == "restore":
+        success = files.restore(file_parameter)
+        return jsonify(info="File Restored") if success else jsonify(error="File Could Not Be Restored")
 
     else:
         return jsonify(error="Unknown action")
