@@ -27,19 +27,16 @@ def validate_auth_key(content):
     else:
         return False, "Unauthorized Request"
 
-
 @app.route('/editor/')
-def serve_frontend_default():
+def frontend_default():
     return send_from_directory('frontend/', "index.htm")
 
-
 @app.route('/editor/<path:path>')
-def serve_frontend(path):
+def frontend(path):
     return send_from_directory('frontend/', path)
 
-
 @app.route('/api', methods=['POST'])
-def text():
+def api():
     """
     Either updates or retrieves a text file, depending on the query.
     :param file_parameter:The text file to update/get.
