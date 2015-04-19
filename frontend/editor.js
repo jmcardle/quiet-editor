@@ -1,5 +1,5 @@
 const AUTHORIZATION_KEY = "3ul4VME1iusE8f5t4C3Fx7m39xOmJ49q";
-const TEXT_URL = "http://127.0.0.1:5000/api/text/";
+const TEXT_URL = "http://127.0.0.1:5000/api";
 const LOAD_TEXT = "load";
 const STORE_TEXT = "store";
 const LIST_FILES = "list";
@@ -8,6 +8,7 @@ const TRASH_FILE = "trash";
 const RESTORE_FILE = "restore";
 const RENAME_FILE = "rename";
 const DELETE_FILE = "delete";
+const EXPORT_FILE = "export";
 const HELP = "help";
 const STORAGE_ACTIVE_FILE = "active-file";
 const DEFAULT_FILE = "default";
@@ -52,7 +53,7 @@ $(function() {
     app.controller('editorController', ['$scope', '$sce', '$http', 'toaster', function($scope, $sce, $http, toaster) {
 
         // Call the API and handle the output.
-        this.callBackend = function ( action, file, arguments ) {
+        this.callBackend = function ( action, arguments ) {
 
             request = { auth : AUTHORIZATION_KEY, action : action };
 
@@ -61,7 +62,7 @@ $(function() {
                 request[key] = arguments[key];
             }
 
-            $http.post( TEXT_URL + file, request ).
+            $http.post( TEXT_URL, request ).
                 success(function(data, status, headers, config) {
 
                     // Populate the text area.
@@ -78,6 +79,11 @@ $(function() {
                         toaster.pop('warning', "", data.error);
                     }
 
+                    if ( data.exported ) {
+                        var blob = new Blob([data.exported], {type: "text/plain;charset=utf-8"});
+                        saveAs(blob, data.name);
+                    }
+
                     // Populate the preview
                     if ( data.html || action == LOAD_TEXT || action == STORE_TEXT ) {
                         $scope.renderedText = $sce.trustAsHtml(data.html);
@@ -90,11 +96,11 @@ $(function() {
         }
 
         // Initialize by querying the server for what we have.
-        this.callBackend( LOAD_TEXT, getActiveFile() );
+        this.callBackend( LOAD_TEXT, { file: getActiveFile() } );
 
         // Whenever there's new text, update the server.
         this.updateText = function( text ) {
-            this.callBackend( STORE_TEXT, getActiveFile(), { text : text });
+            this.callBackend( STORE_TEXT, { file: getActiveFile(), text : text });
         }
 
         // When a command comes in, process it.
@@ -107,33 +113,37 @@ $(function() {
 
             if ( command == HELP ) {
 
-                this.callBackend( HELP, HELP );
+                this.callBackend( HELP );
 
             } else if ( command == LIST_FILES ) {
 
-                var arguments = ( arguments == "trash" ) ? "trash" : "all";
-                this.callBackend( LIST_FILES, arguments );
+                this.callBackend( LIST_FILES, ( arguments == "trash" ) ? { mode: "trash" } : { } );
 
             } else if ( command == LOAD_FILE ) {
 
                 setActiveFile( arguments );
-                this.callBackend( LOAD_TEXT, getActiveFile() );
+                this.callBackend( LOAD_TEXT, { file: getActiveFile() } );
 
             } else if ( command == TRASH_FILE ) {
 
-                this.callBackend( TRASH_FILE, arguments );
+                this.callBackend( TRASH_FILE, { file: arguments } );
 
             } else if ( command == DELETE_FILE ) {
 
-                this.callBackend( DELETE_FILE, arguments );
+                this.callBackend( DELETE_FILE, { file: arguments } );
 
             } else if ( command == RESTORE_FILE ) {
 
-                this.callBackend( RESTORE_FILE, arguments );
+                this.callBackend( RESTORE_FILE, { file: arguments } );
 
             } else if ( command == STORE_TEXT ) {
 
-                this.callBackend( STORE_TEXT, arguments, { text : this.inputText });
+                var fileToStore = ( arguments == "" ) ? getActiveFile() : arguments;
+                this.callBackend( STORE_TEXT, { file: fileToStore, text : this.inputText });
+
+            } else if ( command == EXPORT_FILE ) {
+
+                this.callBackend( EXPORT_FILE, { file: getActiveFile(), mode: arguments } );
 
             } else {
 

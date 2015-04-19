@@ -1,6 +1,7 @@
 #!flask/bin/python
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
+import html
 import markdown
 import files
 import help
@@ -27,8 +28,8 @@ def validate_auth_key(content):
         return False, "Unauthorized Request"
 
 
-@app.route('/api/text/<file_parameter>', methods=['POST'])
-def text(file_parameter):
+@app.route('/api', methods=['POST'])
+def text():
     """
     Either updates or retrieves a text file, depending on the query.
     :param file_parameter:The text file to update/get.
@@ -42,27 +43,29 @@ def text(file_parameter):
         return jsonify(error=reason)
 
     action = content["action"] if "action" in content else "get"
-    print("Action \"%s\" on file \"%s\"" % (action, file_parameter))
+    file_name = content["file"] if "file" in content else False
+    input_text = content["text"] if "text" in content else ""
+    mode = content["mode"] if "mode" in content else ""
 
     if action == "help":
         rendered_text = markdown.markdown(help.help, output_format="html5")
         return jsonify(html=rendered_text)
 
-    elif action == "load":
-        initial_text = files.get(file_parameter)
+    elif action == "load" and file_name:
+        initial_text = files.get(file_name)
         rendered_text = markdown.markdown(initial_text, output_format="html5")
-        return jsonify(text=initial_text, html=rendered_text, info=str("Loaded \"%s\"" % file_parameter))
+        safe_file_name = html.escape(file_name)
+        return jsonify(text=initial_text, html=rendered_text, info=str("Loaded \"%s\"" % safe_file_name))
 
-    elif action == "store":
-        input_text = content["text"] if "text" in content else ""
-        files.set(file_parameter, input_text)
+    elif action == "store" and file_name:
+        files.set(file_name, input_text)
         rendered_text = markdown.markdown(input_text, output_format="html5")
         return jsonify(html=rendered_text)
 
     elif action == "list":
         markdown_output = ""
 
-        if ( file_parameter == "trash" ):
+        if ( mode == "trash" ):
             markdown_output = "# Trash Bin\n"
             markdown_output += str().join(["* " + single_file + "\n" for single_file in files.list_trash()])
         else:
@@ -72,17 +75,26 @@ def text(file_parameter):
         rendered_text = markdown.markdown(markdown_output, output_format="html5")
         return jsonify(html=rendered_text)
 
-    elif action == "trash":
-        success = files.trash(file_parameter)
+    elif action == "trash" and file_name:
+        success = files.trash(file_name)
         return jsonify(info="File Trashed") if success else jsonify(error="File Could Not Be Trashed")
 
-    elif action == "restore":
-        success = files.restore(file_parameter)
+    elif action == "restore" and file_name:
+        success = files.restore(file_name)
         return jsonify(info="File Restored") if success else jsonify(error="File Could Not Be Restored")
 
-    elif action == "delete":
-        success = files.delete(file_parameter)
+    elif action == "delete" and file_name:
+        success = files.delete(file_name)
         return jsonify(info="Trashed File Deleted") if success else jsonify(error="Could Not Delete Trashed File")
+
+    elif action == "export":
+        markdown_text = files.get(file_name)
+
+        if mode == "html":
+            return jsonify(name="exported-file.html", exported=markdown.markdown(markdown_text, output_format="html5"))
+
+        else:
+            return jsonify(name="exported-file.md", exported=markdown_text)
 
     else:
         return jsonify(error="Unknown action")

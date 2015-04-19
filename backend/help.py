@@ -33,6 +33,14 @@ Deletes a file from the trash bin. Once deletion occurs, the file can no longer 
 ### restore _file_
 Takes a file out of the trash bin and makes it usable again.
 
+## Export
+
+### export
+Exports the file in the default format (markdown.)
+
+### export html
+Exports the file in HTML.
+
 ## Misc.
 
 ### help
