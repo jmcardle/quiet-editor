@@ -103,44 +103,47 @@ $(function() {
             var firstSpace = userInput.indexOf(" ");
             var command = (firstSpace >= 0) ? userInput.substring(0, firstSpace) : userInput;
             var arguments = (firstSpace >= 0) ? userInput.substring(firstSpace + 1).trim() : "";
-
+            var clearCommandLine = true;
 
             if ( command == HELP ) {
 
                 this.callBackend( HELP, HELP );
-                this.command = null;
 
             } else if ( command == LIST_FILES ) {
 
                 var arguments = ( arguments == "trash" ) ? "trash" : "all";
                 this.callBackend( LIST_FILES, arguments );
-                this.command = null;
 
             } else if ( command == LOAD_FILE ) {
 
-                setActiveFile( arguments )
+                setActiveFile( arguments );
                 this.callBackend( LOAD_TEXT, getActiveFile() );
-                this.command = null;
 
             } else if ( command == TRASH_FILE ) {
 
                 this.callBackend( TRASH_FILE, arguments );
-                this.command = null;
 
             } else if ( command == DELETE_FILE ) {
 
                 this.callBackend( DELETE_FILE, arguments );
-                this.command = null;
 
             } else if ( command == RESTORE_FILE ) {
 
                 this.callBackend( RESTORE_FILE, arguments );
-                this.command = null;
+
+            } else if ( command == STORE_TEXT ) {
+
+                this.callBackend( STORE_TEXT, arguments, { text : this.inputText });
 
             } else {
 
                 toaster.pop('error', '', "Unrecognized command.");
+                clearCommandLine = false;
 
+            }
+
+            if ( clearCommandLine ) {
+                this.command = null;
             }
 
         }

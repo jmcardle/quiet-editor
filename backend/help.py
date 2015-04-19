@@ -17,7 +17,8 @@ Retrieves the contents of a text file. Files in the trash must be restored befor
 ### store _file_
 Sets or updates the contents of a file. The file is created if it does not exist.
 
-_Storing to files is automatically handled in the editor. Running this command is for the API._
+_Storing to files is automatically handled in the editor. This command is for the API.
+Running it in the editor will have the equivalent effect of making a copy._
 
 ## Trash Bin
 
