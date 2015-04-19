@@ -12,7 +12,9 @@ Lists contents of the trash bin. Use *restore* to retrieve files from the trash.
 ## Opening / Saving Files
 
 ### load _file_
-Retrieves the contents of a text file. Files in the trash must be restored before they can be loaded.
+Retrieves the contents of a text file. A blank file is provided if it does not exist.
+
+Files in the trash must be restored before they can be loaded.
 
 ### store _file_
 Sets or updates the contents of a file. The file is created if it does not exist.
