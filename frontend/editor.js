@@ -1,11 +1,13 @@
 const AUTHORIZATION_KEY = "3ul4VME1iusE8f5t4C3Fx7m39xOmJ49q";
 const TEXT_URL = "http://127.0.0.1:5000/api/text/";
-const GET_TEXT = "get";
-const SET_TEXT = "set";
+const LOAD_TEXT = "load";
+const STORE_TEXT = "store";
 const LIST_FILES = "list";
 const LOAD_FILE = "load";
 const TRASH_FILE = "trash";
 const RESTORE_FILE = "restore";
+const RENAME_FILE = "rename";
+const DELETE_FILE = "delete";
 const HELP = "help";
 const STORAGE_ACTIVE_FILE = "active-file";
 const DEFAULT_FILE = "default";
@@ -63,7 +65,7 @@ $(function() {
                 success(function(data, status, headers, config) {
 
                     // Populate the text area.
-                    if ( action == GET_TEXT ) {
+                    if ( action == LOAD_TEXT ) {
                         $scope.editor.inputText = data.text;
                     }
 
@@ -77,7 +79,7 @@ $(function() {
                     }
 
                     // Populate the preview
-                    if ( data.html || action == GET_TEXT || action == SET_TEXT ) {
+                    if ( data.html || action == LOAD_TEXT || action == STORE_TEXT ) {
                         $scope.renderedText = $sce.trustAsHtml(data.html);
                     }
 
@@ -88,11 +90,11 @@ $(function() {
         }
 
         // Initialize by querying the server for what we have.
-        this.callBackend( GET_TEXT, getActiveFile() );
+        this.callBackend( LOAD_TEXT, getActiveFile() );
 
         // Whenever there's new text, update the server.
         this.updateText = function( text ) {
-            this.callBackend( SET_TEXT, getActiveFile(), { text : text });
+            this.callBackend( STORE_TEXT, getActiveFile(), { text : text });
         }
 
         // When a command comes in, process it.
@@ -105,7 +107,7 @@ $(function() {
 
             if ( command == HELP ) {
 
-                toaster.pop('info', 'Commands', "help, list, list trash, load, trash, restore");
+                this.callBackend( HELP, HELP );
                 this.command = null;
 
             } else if ( command == LIST_FILES ) {
@@ -117,12 +119,17 @@ $(function() {
             } else if ( command == LOAD_FILE ) {
 
                 setActiveFile( arguments )
-                this.callBackend( GET_TEXT, getActiveFile() );
+                this.callBackend( LOAD_TEXT, getActiveFile() );
                 this.command = null;
 
             } else if ( command == TRASH_FILE ) {
 
                 this.callBackend( TRASH_FILE, arguments );
+                this.command = null;
+
+            } else if ( command == DELETE_FILE ) {
+
+                this.callBackend( DELETE_FILE, arguments );
                 this.command = null;
 
             } else if ( command == RESTORE_FILE ) {

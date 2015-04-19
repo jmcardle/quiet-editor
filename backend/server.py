@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import markdown
 import files
+import help
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -43,14 +44,18 @@ def text(file_parameter):
     action = content["action"] if "action" in content else "get"
     print("Action \"%s\" on file \"%s\"" % (action, file_parameter))
 
-    if action == "get":
+    if action == "help":
+        rendered_text = markdown.markdown(help.help, output_format="html5")
+        return jsonify(html=rendered_text)
+
+    elif action == "load":
         initial_text = files.get(file_parameter)
         rendered_text = markdown.markdown(initial_text, output_format="html5")
         return jsonify(text=initial_text, html=rendered_text, info=str("Loaded \"%s\"" % file_parameter))
 
-    elif action == "set":
+    elif action == "store":
         input_text = content["text"] if "text" in content else ""
-        files.update(file_parameter, input_text)
+        files.set(file_parameter, input_text)
         rendered_text = markdown.markdown(input_text, output_format="html5")
         return jsonify(html=rendered_text)
 
@@ -69,11 +74,15 @@ def text(file_parameter):
 
     elif action == "trash":
         success = files.trash(file_parameter)
-        return jsonify(info="File Deleted") if success else jsonify(error="File Could Not Be Deleted")
+        return jsonify(info="File Trashed") if success else jsonify(error="File Could Not Be Trashed")
 
     elif action == "restore":
         success = files.restore(file_parameter)
         return jsonify(info="File Restored") if success else jsonify(error="File Could Not Be Restored")
+
+    elif action == "delete":
+        success = files.delete(file_parameter)
+        return jsonify(info="Trashed File Deleted") if success else jsonify(error="Could Not Delete Trashed File")
 
     else:
         return jsonify(error="Unknown action")

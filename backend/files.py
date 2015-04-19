@@ -32,7 +32,7 @@ def get(file_name):
     else:
         return ""
 
-def update(file_name, text):
+def set(file_name, text):
 
     # File doesn't exist or isn't in database.
     if not file_exists(file_name) or file_name not in files:
@@ -55,6 +55,13 @@ def update(file_name, text):
 
 def trash(file_name):
     return move_file(file_name, file_directory, trash_directory)
+
+def delete(file_name):
+    try:
+        os.remove(to_safe_filename(file_name, trash_directory))
+        return True
+    except OSError:
+        return False
 
 def restore(file_name):
     return move_file(file_name, trash_directory, file_directory)
