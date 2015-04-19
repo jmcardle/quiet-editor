@@ -1,10 +1,10 @@
 #!flask/bin/python
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import html
 import markdown
-import files
-import help
+import backend.files as files
+import backend.help as help
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -26,6 +26,16 @@ def validate_auth_key(content):
         return True, ""
     else:
         return False, "Unauthorized Request"
+
+
+@app.route('/editor/')
+def serve_frontend_default():
+    return send_from_directory('frontend/', "index.htm")
+
+
+@app.route('/editor/<path:path>')
+def serve_frontend(path):
+    return send_from_directory('frontend/', path)
 
 
 @app.route('/api', methods=['POST'])

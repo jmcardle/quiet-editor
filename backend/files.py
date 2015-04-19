@@ -2,8 +2,8 @@ import base64
 import os
 
 files = {}
-file_directory = "../files"
-trash_directory = "../files/trash"
+file_directory = "files"
+trash_directory = "files/trash"
 
 def list():
 
