@@ -2,13 +2,13 @@
 
 Quiet Editor is a distraction-free text editor.
 
-# To Start Editing Files
+# Running the Editor
 
-Start the server by running the following command:
+Start the editor by running the following command:
 
-    python editor.py
+    ./editor.py
     
-Then navigate your web browser to:
+A new web browser window should automatically open to:
 
     http://localhost:5000/editor/
     
