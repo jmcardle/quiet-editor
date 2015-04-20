@@ -1,4 +1,4 @@
-#!flask/bin/python
+#!/usr/bin/env python3
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import html
@@ -110,4 +110,4 @@ def api():
 
 if __name__ == '__main__':
     webbrowser.open_new_tab("http://127.0.0.1:5000/editor/")
-    app.run(debug=True)
+    app.run(debug=False)
