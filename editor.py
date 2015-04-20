@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import html
 import markdown
+import webbrowser
 import backend.files as files
 import backend.help as help
 
@@ -108,4 +109,5 @@ def api():
 
 
 if __name__ == '__main__':
+    webbrowser.open_new_tab("http://127.0.0.1:5000/editor/")
     app.run(debug=True)
