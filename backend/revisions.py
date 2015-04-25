@@ -46,4 +46,3 @@ class Revisions:
         object_store.add_object(commit)
 
         self.repo.refs[Settings.git_branch] = commit.id
-        head = self.repo.refs['HEAD']

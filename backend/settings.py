@@ -8,7 +8,7 @@ class Settings:
 
     git_directory = os.path.join(file_directory, ".git")
 
-    author = "Maëlys McArdle"
+    author = "Maelys McArdle"
 
     timezone = "-0400"
 
