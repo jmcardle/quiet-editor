@@ -1,7 +1,9 @@
 from dulwich.repo import Repo
 from dulwich.objects import Blob, Tree, Commit, parse_timezone
+import dulwich.errors
 from settings import Settings
 from time import time
+import os
 
 class Revisions:
 
@@ -13,7 +15,8 @@ class Revisions:
 
         try:
             return Repo(repository)
-        except NameError:
+
+        except dulwich.errors.NotGitRepository:
             return Repo.init(repository)
 
     def commit_file(self, message, filename, contents):

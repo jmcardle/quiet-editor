@@ -2,26 +2,16 @@ import os
 
 class Settings:
 
-    @property
-    def file_directory(self):
-        return "files"
+    file_directory = "files"
 
-    @property
-    def trash_directory(self):
-        return os.path.join(self.file_directory, "trash")
+    trash_directory = os.path.join(file_directory, "trash")
 
-    @property
-    def author(self):
-        return "Maëlys McArdle"
+    git_directory = os.path.join(file_directory, ".git")
 
-    @property
-    def timezone(self):
-        return "-0400"
+    author = "Maëlys McArdle"
 
-    @property
-    def file_permissions(self):
-        return 0o100644
+    timezone = "-0400"
 
-    @property
-    def git_branch(self):
-        return 'refs/heads/master'
+    file_permissions = 0o100644
+
+    git_branch = 'refs/heads/master'
