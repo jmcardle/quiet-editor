@@ -22,7 +22,7 @@ class Revisions:
 
         tree = self.repo.TreeBuilder()
         tree.insert(filename, blob.id, pygit2.GIT_FILEMODE_BLOB)
-        tree.write()
+        tree = tree.write()
 
         author = pygit2.Signature(Settings.author, Settings.email)
         committer = pygit2.Signature(Settings.author, Settings.email)
