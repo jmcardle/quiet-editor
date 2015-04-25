@@ -1,20 +1,19 @@
 import base64
 import os
+from settings import Settings
 
 files = {}
-file_directory = "files"
-trash_directory = "files/trash"
 
 def list():
-
-    return [from_safe_filename(file_name) for file_name in os.listdir(file_directory)
-                if os.path.isfile(os.path.join(file_directory, file_name))]
+    return list_directory(Settings.file_directory)
 
 def list_trash():
+    return list_directory(Settings.trash_directory)
 
-    return [from_safe_filename(file_name) for file_name in os.listdir(trash_directory)
-                if os.path.isfile(os.path.join(trash_directory, file_name))]
+def list_directory(directory):
 
+    return [from_safe_filename(file_name) for file_name in os.listdir(directory)
+                if os.path.isfile(os.path.join(directory, file_name))]
 
 def get(file_name):
 
@@ -54,17 +53,17 @@ def set(file_name, text):
     files[file_name] = text
 
 def trash(file_name):
-    return move_file(file_name, file_directory, trash_directory)
+    return move_file(file_name, Settings.file_directory, Settings.trash_directory)
 
 def delete(file_name):
     try:
-        os.remove(to_safe_filename(file_name, trash_directory))
+        os.remove(to_safe_filename(file_name, Settings.trash_directory))
         return True
     except OSError:
         return False
 
 def restore(file_name):
-    return move_file(file_name, trash_directory, file_directory)
+    return move_file(file_name, Settings.trash_directory, Settings.file_directory)
 
 def move_file(file_name, from_directory, to_directory):
 
@@ -95,7 +94,7 @@ def truncate_file(file_name, size):
 def file_exists(file_name):
     return os.path.isfile(to_safe_filename(file_name))
 
-def to_safe_filename(file_name, directory=file_directory):
+def to_safe_filename(file_name, directory=Settings.file_directory):
     return os.path.join(directory, base64.urlsafe_b64encode(file_name.encode()).decode())
 
 def from_safe_filename(file_name):
