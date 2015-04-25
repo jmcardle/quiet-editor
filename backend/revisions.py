@@ -27,4 +27,12 @@ class Revisions:
         author = pygit2.Signature(Settings.author, Settings.email)
         committer = pygit2.Signature(Settings.author, Settings.email)
 
-        self.repo.create_commit(Settings.branch, author, committer, message, tree, [])
+        if self.repo.head_is_unborn:
+
+            # First commit.
+            self.repo.create_commit(Settings.branch, author, committer, message, tree, [])
+
+        else:
+
+            # Second commit onwards.
+            pass
