@@ -10,6 +10,8 @@ class Settings:
 
     author = "Maëlys McArdle"
 
+    email = ""
+
     timezone = "-0400"
 
     file_permissions = 0o100644

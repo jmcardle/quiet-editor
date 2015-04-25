@@ -22,5 +22,9 @@ class Revisions:
 
         tree = self.repo.TreeBuilder()
         tree.insert(filename, blob.id, pygit2.GIT_FILEMODE_BLOB)
+        tree.write()
 
-        self.repo.create_commit(Settings.branch, Settings.author, Settings.author, message, tree, [])
+        author = pygit2.Signature(Settings.author, Settings.email)
+        committer = pygit2.Signature(Settings.author, Settings.email)
+
+        self.repo.create_commit(Settings.branch, author, committer, message, tree, [])
