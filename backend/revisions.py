@@ -1,6 +1,5 @@
 import pygit2
 from settings import Settings
-from time import time
 
 class Revisions:
 
@@ -12,6 +11,7 @@ class Revisions:
 
         try:
             return pygit2.Repository(repository)
+
         except KeyError:
             return pygit2.init_repository(repository)
 
@@ -24,8 +24,8 @@ class Revisions:
         tree.insert(filename, blob.id, pygit2.GIT_FILEMODE_BLOB)
         tree = tree.write()
 
-        author = pygit2.Signature(Settings.author, Settings.email)
-        committer = pygit2.Signature(Settings.author, Settings.email)
+        author = pygit2.Signature(Settings.author.encode('utf-8'), Settings.email)
+        committer = pygit2.Signature(Settings.author.encode('utf-8'), Settings.email)
 
         if self.repo.head_is_unborn:
 
@@ -35,4 +35,5 @@ class Revisions:
         else:
 
             # Second commit onwards.
-            pass
+            last_commit = self.repo.revparse_single('HEAD')
+            self.repo.create_commit(Settings.branch, author, committer, message, tree, [ last_commit.id ])
